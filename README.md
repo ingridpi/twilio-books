@@ -2,7 +2,7 @@
 
 ## Run the app
 
-### Setting up the environment
+Setting up the environment
 
 1. Change the directory to `Twilio Books App`
     ```
@@ -22,14 +22,14 @@
     pip install -r requirements.txt
     ```
 
-### Running the application
+Running the application
 
 After having followed the steps of the previous section, run the command:
 ```
 python3 app.py
 ```
 
-### Exposing the application
+Exposing the application
 
 Once the app is running, to expose it on the internet, run the command:
 
@@ -64,7 +64,7 @@ The main functionality described above can be summarised in the following table:
 | Text Format    | Description     | Example     |
 | :------------- | :-------------- | :------------ |
 | quote | Get a random quote from api.quotable.io | *quote* |
-| **library_%.csv*+ | Send a file to upload the associated reading library | *library_ingrid.csv* |
+| **library_%.csv** | Send a file to upload the associated reading library | *library_ingrid.csv* |
 | random | Get a random book from your reading library that you have not read yet | *random* |
 | book-**%book_name%** | Get the book information from the book with name %book_name% | *book-throne of glass* |
 | author-**%author_name%** | Get the list of books from the author with name %author_name% in your library | *author-victoria aveyard* |
