@@ -8,11 +8,8 @@ app = Flask('books')
 
 @app.route('/', methods=['GET'])
 def start():
-    outgoing = MessagingResponse()
-    msg = outgoing.message()
-    message = "Welcome to the Bookish app! To enable this service on WhatsApp, text: join collect-dried to +1 415 523 8886"
-    msg.body(message)
-    return str(outgoing)
+    return "<h1>Welcome to the Bookish app!</h1> <br> <p>To enable this service on WhatsApp, text: join collect-dried to +1 415 523 8886</p>"
+
 
 @app.route('/book', methods=['POST'])
 def book():
