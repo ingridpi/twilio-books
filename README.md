@@ -29,7 +29,7 @@ After having followed the steps of the previous section, run the command:
 python3 app.py
 ```
 
-### Exposing the application
+### Exposing the application
 
 Once the app is running, to expose it on the internet, run the command:
 
