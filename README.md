@@ -2,7 +2,7 @@
 
 ## Run the app
 
-Setting up the environment
+### Setting up the environment
 
 1. Change the directory to `Twilio Books App`
     ```
@@ -22,14 +22,14 @@ Setting up the environment
     pip install -r requirements.txt
     ```
 
-Running the application
+### Running the application
 
 After having followed the steps of the previous section, run the command:
 ```
 python3 app.py
 ```
 
-Exposing the application
+### Exposing the application
 
 Once the app is running, to expose it on the internet, run the command:
 
