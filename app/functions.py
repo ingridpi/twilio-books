@@ -7,6 +7,7 @@ books = {}
 readings = {}
 
 def init():
+    print("Initialised")
     add_book("+34689421612", "library_ingrid.csv")
     add_book("+34683583922", "library_clara.csv")
     add_reading("+34689421612", "reading_city_of_ashes.csv")
