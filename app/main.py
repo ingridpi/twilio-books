@@ -19,6 +19,7 @@ def book():
     responded = False
     sender = request.values.get('From', '').lower()
     sender = sender.split(":")[1]
+    print(sender)
 
     media = int(request.values.get('NumMedia'))
 
