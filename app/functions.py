@@ -19,7 +19,7 @@ def add_book(sender, filename):
 
 def load_book(filename):
     columns = ["Title", "Author", "My Rating", "Average Rating", "Number of Pages", "Date Read", "Exclusive Shelf"]
-    data = pd.read_csv(filename)
+    data = pd.read_csv("./data/" + filename)
     data = data[columns]
     data["Date Read"] = pd.to_datetime(data["Date Read"])
     return data
@@ -39,7 +39,7 @@ def add_reading(sender, filename):
 
 
 def load_reading(filename):
-    data = pd.read_csv(filename)
+    data = pd.read_csv("./data/" + filename)
     data["Pending"] = True
     return data
 

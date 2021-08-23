@@ -1,12 +1,17 @@
 from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 
-from functions import *
+from app.functions import *
 
 app = Flask('books')
 
 
-@app.route('/book', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
+def start():
+    return "<h1>Welcome to the Bookish app!</h1> <p>To enable this service on WhatsApp, text: join collect-dried to +1 415 523 8886</p>"
+
+
+@app.route('/book', methods=['POST'])
 def book():
     incoming = request.values.get('Body', '').lower()
     outgoing = MessagingResponse()
@@ -66,8 +71,3 @@ def book():
         hello(msg)
 
     return str(outgoing)
-
-
-if __name__ == '__main__':
-    init()
-    app.run(debug=True, host='127.0.0.1', port=8080)
