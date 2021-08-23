@@ -10,6 +10,7 @@ def init():
     add_book("+34689421612", "library_ingrid.csv")
     add_book("+34683583922", "library_clara.csv")
     add_reading("+34689421612", "reading_city_of_ashes.csv")
+    add_reading("+34689421612", "reading_atomic_habits.csv")
     add_reading("+34683583922", "reading_city_of_ashes.csv")
 
 
@@ -103,8 +104,10 @@ def book_info(msg, title, sender):
             rating = book["Average Rating"].values[0]
             book_info = "*{}* \nAuthor: {} \nPages: {} \nAverage Rating: {}".format(title, author, pages, rating)
 
-            date_read = book["Date Read"].dt.strftime("%d %b %Y").values[0]
-            if not np.isnan(date_read):
+            date_read = book["Date Read"].values[0]
+
+            if not np.isnat(date_read):
+                date_read = book["Date Read"].dt.strftime("%d %b %Y").values[0]
                 my_rating = book["My Rating"].values[0]
                 book_info += "\nDate Read: {} \nMy Rating: {}".format(date_read, my_rating)
 
