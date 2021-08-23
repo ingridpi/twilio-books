@@ -6,7 +6,15 @@ from functions import *
 app = Flask('books')
 
 
-@app.route('/book', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
+def init():
+    outgoing = MessagingResponse()
+    msg = outgoing.message()
+    message = "Welcome to the Bookish app! To enable this service on WhatsApp, text: join collect-dried to +1 415 523 8886"
+    msg.body(message)
+    return str(outgoing)
+
+@app.route('/book', methods=['POST'])
 def book():
     incoming = request.values.get('Body', '').lower()
     outgoing = MessagingResponse()
