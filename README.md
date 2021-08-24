@@ -95,5 +95,5 @@ The files format should be:
 | Column Name | Description | Example |
 | :------------- | :------------- | :------------- |
 | Book | Book title (String) | *City of Ashes* |
-| Date | Date the reading is scheduled (DD/MM/YYYY) | *22/08/2021* |
+| Date | Date the reading is scheduled (DD/MM/YYYY) | *2021/08/22* |
 | Chapters | Begin Chapter - End Chapter (String) | *Prologue - 3* |
