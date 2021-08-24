@@ -1,8 +1,8 @@
-Book,Date,Chapters
-City of Ashes,12/08/2021,Prologue - 3
-City of Ashes,13/08/2021,4 - 7
-City of Ashes,14/08/2021,8 - 9
-City of Ashes,15/08/2021,10 - 13
-City of Ashes,16/08/2021,14 - 15
-City of Ashes,17/08/2021,16 - 18
-City of Ashes,18/08/2021,19 - Epilogue
+Book,Date,Chapters,Pending
+City of Ashes,2021-08-12,Prologue - 3,False
+City of Ashes,2021-08-13,4 - 7,False
+City of Ashes,2021-08-14,8 - 9,False
+City of Ashes,2021-08-15,10 - 13,False
+City of Ashes,2021-08-16,14 - 15,False
+City of Ashes,2021-08-17,16 - 18,False
+City of Ashes,2021-08-18,19 - Epilogue,False

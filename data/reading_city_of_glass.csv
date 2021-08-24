@@ -1,10 +1,10 @@
-Book,Date,Chapters
-City of Glass,24/08/2021,1 - 3
-City of Glass,25/08/2021,4 - 5
-City of Glass,26/08/2021,6 - 8
-City of Glass,27/08/2021,9 - 11
-City of Glass,28/08/2021,12 - 14
-City of Glass,29/08/2021,15 - 16
-City of Glass,30/08/2021,17 - 18
-City of Glass,31/08/2021,19 - 20
-City of Glass,01/09/2021,Epilogue
+Book,Date,Chapters,Pending
+City of Glass,2021-08-24,1 - 3,True
+City of Glass,2021-08-25,4 - 5,True
+City of Glass,2021-08-26,6 - 8,True
+City of Glass,2021-08-27,9 - 11,True
+City of Glass,2021-08-28,12 - 14,True
+City of Glass,2021-08-29,15 - 16,True
+City of Glass,2021-08-30,17 - 18,True
+City of Glass,2021-08-31,19 - 20,True
+City of Glass,2021-09-01,Epilogue,True
