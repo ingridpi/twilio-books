@@ -6,15 +6,7 @@ import os
 
 books = {}
 readings = {}
-api_key = ""
-
-def init():
-    add_library("+34689421612", "library_ingrid.csv")
-    add_library("+34683583922", "library_clara.csv")
-    add_reading("+34689421612", "reading_city_of_ashes.csv")
-    add_reading("+34689421612", "reading_atomic_habits.csv")
-    add_reading("+34683583922", "reading_city_of_ashes.csv")
-    api_key = os.environ['BOOKS_API']
+api_key = os.environ['BOOKS_API']
 
 
 def add_library(sender, filename):
