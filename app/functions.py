@@ -43,7 +43,7 @@ def load_reading(filename):
 
 
 def hello(msg):
-    message = "Welcome to Bookish! \nTo get a quote, text *quote* \nTo upload your reading library, send a csv file named *library_%.csv* \nTo retrieve information from your library, the available options are: \n\t*random*: Get a random book from your to-read list \n\t*book-%book_title%*: Information about the book \n\t*author - %author_name%*: Books from that author \nTo upload your reading schedule, send a csv file named *reading_%.csv* \nTo retrieve information from your reading schedule, the available options are: \n\t*today*: Get what you have pending to read until today \n\t*today-%book_title%*: Get what you have pending to read until today from a given book \n\t*complete*: Mark everything until today as read \n\t*complete-%book_name%*: Mark everything until today from the given book as read"
+    message = "Welcome to Bookish! \nTo get a quote, text *quote* \nTo upload your reading library, send a csv file named *library_%.csv* \nTo retrieve information from your library, the available options are: \n\t*random*: Get a random book from your to-read list \n\t*book-%book_title%*: Information about the book \n\t*author - %author_name%*: Books from that author \nTo upload your reading schedule, send a csv file named *reading_%.csv* \n\tIf a book or author were not found in your library, it will look for it in the Google Books API \nTo retrieve information from your reading schedule, the available options are: \n\t*today*: Get what you have pending to read until today \n\t*today-%book_title%*: Get what you have pending to read until today from a given book \n\t*complete*: Mark everything until today as read \n\t*complete-%book_name%*: Mark everything until today from the given book as read"
     msg.body(message)
 
 
@@ -98,13 +98,19 @@ def look_book(title):
         data = req.json()
 
         if data["totalItems"] != 0:
-            book = data["items"][0]["volumeInfo"]
+            for item in data["items"]:
+                book = item["volumeInfo"]
+                name = book["title"]
 
-            title = book["title"]
-            author = book["authors"][0]
-            pages = book["pageCount"] if "pageCount" in book else "unknown"
-            rating = book["averageRating"] if "averageRating" in book else "unknown"
-            book_info = "*{}* \nAuthor: {} \nPages: {} \nAverage Rating: {}".format(title, author, pages, rating)
+                if title in name.lower():
+                    author = book["authors"][0]
+                    pages = book["pageCount"] if "pageCount" in book else "unknown"
+                    rating = book["averageRating"] if "averageRating" in book else "unknown"
+                    book_info = "*{}* \nAuthor: {} \nPages: {} \nAverage Rating: {}".format(name, author, pages, rating)
+                    break
+
+            else:
+                book_info = "book could not be found"
 
         else:
             book_info = "book could not be found"
@@ -154,6 +160,8 @@ def look_author(author):
 
     req = requests.get(url, params=params)
 
+    author_info = ""
+
     if req.status_code == 200:
         data = req.json()
 
@@ -161,16 +169,28 @@ def look_author(author):
             books = data["items"]
 
             max = data["totalItems"] if data["totalItems"] < 10 else 10
-            for i in range(0, max):
-                book = books[i]["volumeInfo"]
+            i = 0
 
-                if i == 0:
-                    author = book["authors"][0]
-                    author_info = "*{}*".format(author)
+            for item in books:
+                book = item["volumeInfo"]
+                name = book["authors"][0]
 
-                title = book["title"]
-                rating = book["averageRating"] if "averageRating" in book else "unknown"
-                author_info += "\n{} ({})".format(title, rating)
+                if author in name.lower():
+                    if i == 0:
+                        author_info += "*{}*".format(name)
+
+                    title = book["title"]
+                    rating = book["averageRating"] if "averageRating" in book else "unknown"
+                    author_info += "\n{} ({})".format(title, rating)
+
+                    i += 1
+
+                if i == max:
+                    break
+
+            else:
+                author_info = "author could not be found"
+
 
         else:
             author_info = "author could not be found"
