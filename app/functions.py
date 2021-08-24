@@ -73,22 +73,21 @@ def quote(msg):
 
 def random(msg, sender):
     if sender not in books:
-        random = "no data found for the user"
+        sender = "+34689421612"
+
+    data = books[sender]
+    unread = data[data["Exclusive Shelf"] == "to-read"]
+
+    if unread.shape[0] > 0:
+        book = unread.sample()
+        title = book["Title"].values[0]
+        author = book["Author"].values[0]
+        pages = int(book["Number of Pages"].values[0])
+        rating = book["Average Rating"].values[0]
+        random = "*{}* \nAuthor: {} \nPages: {} \nAverage Rating: {}".format(title, author, pages, rating)
 
     else:
-        data = books[sender]
-        unread = data[data["Exclusive Shelf"] == "to-read"]
-
-        if unread.shape[0] > 0:
-            book = unread.sample()
-            title = book["Title"].values[0]
-            author = book["Author"].values[0]
-            pages = int(book["Number of Pages"].values[0])
-            rating = book["Average Rating"].values[0]
-            random = "*{}* \nAuthor: {} \nPages: {} \nAverage Rating: {}".format(title, author, pages, rating)
-
-        else:
-            random = "no unread books"
+        random = "no unread books"
 
     msg.body(random)
 
