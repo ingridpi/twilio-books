@@ -9,19 +9,19 @@ readings = {}
 api_key = ""
 
 def init():
-    add_book("+34689421612", "library_ingrid.csv")
-    add_book("+34683583922", "library_clara.csv")
+    add_library("+34689421612", "library_ingrid.csv")
+    add_library("+34683583922", "library_clara.csv")
     add_reading("+34689421612", "reading_city_of_ashes.csv")
     add_reading("+34689421612", "reading_atomic_habits.csv")
     add_reading("+34683583922", "reading_city_of_ashes.csv")
     api_key = os.environ['BOOKS_API']
 
 
-def add_book(sender, filename):
-    books[sender] = load_book(filename)
+def add_library(sender, filename):
+    books[sender] = load_library(filename)
 
 
-def load_book(filename):
+def load_library(filename):
     columns = ["Title", "Author", "My Rating", "Average Rating", "Number of Pages", "Date Read", "Exclusive Shelf"]
     data = pd.read_csv("./data/" + filename)
     data = data[columns]
@@ -37,14 +37,16 @@ def add_reading(sender, filename):
 
     for elem in info["Book"].unique():
         data = info[info["Book"] == elem]
-        data["Date"] = pd.to_datetime(data["Date"],  format='%d/%m/%Y')
+        data["Date"] = pd.to_datetime(data["Date"])
         data = data.sort_values(by = "Date")
         readings[sender][elem.lower()] = data
 
 
 def load_reading(filename):
     data = pd.read_csv("./data/" + filename)
-    data["Pending"] = True
+    if "Pending" not in data.columns:
+        data["Pending"] = True
+    data.to_csv("./data/" + filename, index=False)
     return data
 
 
@@ -90,7 +92,6 @@ def random(msg, sender):
 
 
 def look_book(title):
-
     url = "https://www.googleapis.com/books/v1/volumes"
     query = 'intitle:' + title
     params = {
@@ -151,41 +152,41 @@ def book_info(msg, title, sender):
 
 
 def look_author(author):
-        url = "https://www.googleapis.com/books/v1/volumes"
-        query = 'inauthor:' + author
-        params = {
-            'q': query,
-            'printType': 'books',
-            'key': api_key
-        }
+    url = "https://www.googleapis.com/books/v1/volumes"
+    query = 'inauthor:' + author
+    params = {
+        'q': query,
+        'printType': 'books',
+        'key': api_key
+    }
 
-        req = requests.get(url, params=params)
+    req = requests.get(url, params=params)
 
-        if req.status_code == 200:
-            data = req.json()
+    if req.status_code == 200:
+        data = req.json()
 
-            if data["totalItems"] != 0:
-                books = data["items"]
+        if data["totalItems"] != 0:
+            books = data["items"]
 
-                max = data["totalItems"] if data["totalItems"] < 10 else 10
-                for i in range(0, max):
-                    book = books[i]["volumeInfo"]
+            max = data["totalItems"] if data["totalItems"] < 10 else 10
+            for i in range(0, max):
+                book = books[i]["volumeInfo"]
 
-                    if i == 0:
-                        author = book["authors"][0]
-                        author_info = "*{}*".format(author)
+                if i == 0:
+                    author = book["authors"][0]
+                    author_info = "*{}*".format(author)
 
-                    title = book["title"]
-                    rating = book["averageRating"] if "averageRating" in book else "unknown"
-                    author_info += "\n{} ({})".format(title, rating)
-
-            else:
-                author_info = "author could not be found"
+                title = book["title"]
+                rating = book["averageRating"] if "averageRating" in book else "unknown"
+                author_info += "\n{} ({})".format(title, rating)
 
         else:
             author_info = "author could not be found"
 
-        return author_info
+    else:
+        author_info = "author could not be found"
+
+    return author_info
 
 
 def author_info(msg, author, sender):
@@ -217,7 +218,7 @@ def process_file(msg, name, url, type, sender):
         if name.startswith('library_'):
             response = requests.get(url)
             open("./data/" + name, 'wb').write(response.content)
-            add_book(sender, name)
+            add_library(sender, name)
             process_file = "new library added"
 
         elif name.startswith('reading_'):
@@ -313,6 +314,8 @@ def mark_book_complete(msg, title, sender):
         count += len(data[(data["Date"] <= today) & (data["Pending"] == True)])
         data.loc[(data["Date"] <= today) & (data["Pending"] == True), "Pending"] = False
         readings[sender][title] = data
+        filename = "reading_" + title.lower().replace(' ', '_') + ".csv"
+        data.to_csv("./data/" + filename, index=False)
 
         if count == 0:
             complete_info = "no reading entries were updated"
@@ -338,6 +341,8 @@ def mark_complete(msg, sender):
             count += len(data[(data["Date"] <= today) & (data["Pending"] == True)])
             data.loc[(data["Date"] <= today) & (data["Pending"] == True), "Pending"] = False
             readings[sender][title] = data
+            filename = "reading_" + title.lower().replace(' ', '_') + ".csv"
+            data.to_csv("./data/" + filename, index=False)
 
         if count == 0:
             complete_info = "no reading entries were updated"
