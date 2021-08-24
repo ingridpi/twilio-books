@@ -2,9 +2,11 @@ import pandas as pd
 import requests
 import numpy as np
 from datetime import datetime
+import os
 
 books = {}
 readings = {}
+api_key = {}
 
 def init():
     add_book("+34689421612", "library_ingrid.csv")
@@ -12,6 +14,7 @@ def init():
     add_reading("+34689421612", "reading_city_of_ashes.csv")
     add_reading("+34689421612", "reading_atomic_habits.csv")
     add_reading("+34683583922", "reading_city_of_ashes.csv")
+    api_key = os.environ['BOOKS_API']
 
 
 def add_book(sender, filename):
@@ -86,55 +89,126 @@ def random(msg, sender):
     msg.body(random)
 
 
+def look_book(title):
+
+    url = "https://www.googleapis.com/books/v1/volumes"
+    query = 'intitle:' + title
+    params = {
+        'q': query,
+        'printType': 'books',
+        'key': api_key
+    }
+
+    req = requests.get(url, params=params)
+
+    if req.status_code == 200:
+        data = req.json()
+
+        if data["totalItems"] != 0:
+            book = data["items"][0]["volumeInfo"]
+
+            title = book["title"]
+            author = book["authors"][0]
+            pages = book["pageCount"] if "pageCount" in book else "unknown"
+            rating = book["averageRating"] if "averageRating" in book else "unknown"
+            book_info = "*{}* \nAuthor: {} \nPages: {} \nAverage Rating: {}".format(title, author, pages, rating)
+
+        else:
+            book_info = "book could not be found"
+
+    else:
+        book_info = "book could not be found"
+
+    return book_info
+
+
 def book_info(msg, title, sender):
     if sender not in books:
-        book_info = "no data found for the user"
+        output = look_book(title)
 
     else:
         data = books[sender]
         book = data[data["Title"].str.lower().str.startswith(title)]
 
         if book.shape[0] == 0:
-            book_info = "the book was not found"
+            output = look_book(title)
 
         else:
             title = book["Title"].values[0]
             author = book["Author"].values[0]
             pages = int(book["Number of Pages"].values[0])
             rating = book["Average Rating"].values[0]
-            book_info = "*{}* \nAuthor: {} \nPages: {} \nAverage Rating: {}".format(title, author, pages, rating)
+            output = "*{}* \nAuthor: {} \nPages: {} \nAverage Rating: {}".format(title, author, pages, rating)
 
             date_read = book["Date Read"].values[0]
 
             if not np.isnat(date_read):
                 date_read = book["Date Read"].dt.strftime("%d %b %Y").values[0]
                 my_rating = book["My Rating"].values[0]
-                book_info += "\nDate Read: {} \nMy Rating: {}".format(date_read, my_rating)
+                output += "\nDate Read: {} \nMy Rating: {}".format(date_read, my_rating)
 
-    msg.body(book_info)
+    msg.body(output)
+
+
+def look_author(author):
+        url = "https://www.googleapis.com/books/v1/volumes"
+        query = 'inauthor:' + author
+        params = {
+            'q': query,
+            'printType': 'books',
+            'key': api_key
+        }
+
+        req = requests.get(url, params=params)
+
+        if req.status_code == 200:
+            data = req.json()
+
+            if data["totalItems"] != 0:
+                books = data["items"]
+
+                max = data["totalItems"] if data["totalItems"] < 10 else 10
+                for i in range(0, max):
+                    book = books[i]["volumeInfo"]
+
+                    if i == 0:
+                        author = book["authors"][0]
+                        author_info = "*{}*".format(author)
+
+                    title = book["title"]
+                    rating = book["averageRating"] if "averageRating" in book else "unknown"
+                    author_info += "\n{} ({})".format(title, rating)
+
+            else:
+                author_info = "author could not be found"
+
+        else:
+            author_info = "author could not be found"
+
+        return author_info
 
 
 def author_info(msg, author, sender):
     if sender not in books:
-        author_info = "no data found for the user"
+        output = look_author(author)
 
     else:
         data = books[sender]
         book = data[data["Author"].str.lower() == author]
 
         if book.shape[0] == 0:
-            author_info = "the author was not found"
+            output = look_author(author)
 
         else:
             author = book["Author"].values[0]
-            author_info = "*{}*".format(author)
+            output = "*{}*".format(author)
 
             for index, row in book.iterrows():
                 title = row["Title"]
                 rating = row["Average Rating"]
-                author_info += "\n{} ({})".format(title, rating)
+                output += "\n{} ({})".format(title, rating)
 
-    msg.body(author_info)
+    msg.body(output)
 
 
 def process_file(msg, name, url, type, sender):
