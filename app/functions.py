@@ -6,7 +6,7 @@ import os
 
 books = {}
 readings = {}
-api_key = {}
+api_key = ""
 
 def init():
     add_book("+34689421612", "library_ingrid.csv")
@@ -216,18 +216,13 @@ def process_file(msg, name, url, type, sender):
 
         if name.startswith('library_'):
             response = requests.get(url)
-            open(name, 'wb').write(response.content)
+            open("./data/" + name, 'wb').write(response.content)
             add_book(sender, name)
-
-            if sender in books:
-                process_file = "new library added"
-
-            else:
-                process_file = "error occured when adding library"
+            process_file = "new library added"
 
         elif name.startswith('reading_'):
             response = requests.get(url)
-            open(name, 'wb').write(response.content)
+            open("./data/" + name, 'wb').write(response.content)
             add_reading(sender, name)
             process_file = "new reading added"
 
