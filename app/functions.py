@@ -6,7 +6,17 @@ import os
 
 books = {}
 readings = {}
-api_key = os.environ['BOOKS_API']
+api_key = ""
+
+def init():
+    add_library("+34689421612", "library_ingrid.csv")
+    add_library("+34683583922", "library_clara.csv")
+    add_reading("+34689421612", "reading_city_of_ashes.csv")
+    add_reading("+34689421612", "reading_atomic_habits.csv")
+    add_reading("+34689421612", "reading_city_of_glass.csv")
+    add_reading("+34683583922", "reading_city_of_ashes.csv")
+    add_reading("+34683583922", "reading_city_of_glass.csv")
+    api_key = os.environ['BOOKS_API']
 
 
 def add_library(sender, filename):
@@ -123,28 +133,27 @@ def look_book(title):
 
 def book_info(msg, title, sender):
     if sender not in books:
+        sender = "+34689421612"
+
+    data = books[sender]
+    book = data[data["Title"].str.lower().str.startswith(title)]
+
+    if book.shape[0] == 0:
         output = look_book(title)
 
     else:
-        data = books[sender]
-        book = data[data["Title"].str.lower().str.startswith(title)]
+        title = book["Title"].values[0]
+        author = book["Author"].values[0]
+        pages = int(book["Number of Pages"].values[0])
+        rating = book["Average Rating"].values[0]
+        output = "*{}* \nAuthor: {} \nPages: {} \nAverage Rating: {}".format(title, author, pages, rating)
 
-        if book.shape[0] == 0:
-            output = look_book(title)
+        date_read = book["Date Read"].values[0]
 
-        else:
-            title = book["Title"].values[0]
-            author = book["Author"].values[0]
-            pages = int(book["Number of Pages"].values[0])
-            rating = book["Average Rating"].values[0]
-            output = "*{}* \nAuthor: {} \nPages: {} \nAverage Rating: {}".format(title, author, pages, rating)
-
-            date_read = book["Date Read"].values[0]
-
-            if not np.isnat(date_read):
-                date_read = book["Date Read"].dt.strftime("%d %b %Y").values[0]
-                my_rating = book["My Rating"].values[0]
-                output += "\nDate Read: {} \nMy Rating: {}".format(date_read, my_rating)
+        if not np.isnat(date_read):
+            date_read = book["Date Read"].dt.strftime("%d %b %Y").values[0]
+            my_rating = book["My Rating"].values[0]
+            output += "\nDate Read: {} \nMy Rating: {}".format(date_read, my_rating)
 
     msg.body(output)
 
@@ -203,23 +212,22 @@ def look_author(author):
 
 def author_info(msg, author, sender):
     if sender not in books:
+        sender = "+34689421612"
+
+    data = books[sender]
+    book = data[data["Author"].str.lower() == author]
+
+    if book.shape[0] == 0:
         output = look_author(author)
 
     else:
-        data = books[sender]
-        book = data[data["Author"].str.lower() == author]
+        author = book["Author"].values[0]
+        output = "*{}*".format(author)
 
-        if book.shape[0] == 0:
-            output = look_author(author)
-
-        else:
-            author = book["Author"].values[0]
-            output = "*{}*".format(author)
-
-            for index, row in book.iterrows():
-                title = row["Title"]
-                rating = row["Average Rating"]
-                output += "\n{} ({})".format(title, rating)
+        for index, row in book.iterrows():
+            title = row["Title"]
+            rating = row["Average Rating"]
+            output += "\n{} ({})".format(title, rating)
 
     msg.body(output)
 
@@ -250,77 +258,100 @@ def process_file(msg, name, url, type, sender):
 
 def get_book_today(msg, title, sender):
     if sender not in readings:
-        today_info = "no data found for the user"
+        sender = "+34689421612"
+
+    data = readings[sender]
+
+    if title not in data:
+        today_info = "book not found in readings"
 
     else:
-        data = readings[sender]
+        data = readings[sender][title]
+        today = np.datetime64('today')
+        data = data[data["Date"] <= today]
+        data = data[data["Pending"] == True]
 
-        if title not in data:
-            today_info = "book not found in readings"
+        if len(data) == 1:
+            title = data["Book"].values[0]
+            chapters = data["Chapters"].values[0]
+            today_info = "*{}*: {}".format(title, chapters)
+
+        elif len(data) > 1:
+            title = data["Book"].values[0]
+            today_info = "*{}*".format(title)
+
+            for index, row in data.iterrows():
+                date = row["Date"].date().strftime("%d %b")
+                chapters = row["Chapters"]
+                today_info += "\n\t{}: {}".format(date, chapters)
 
         else:
-            data = readings[sender][title]
-            today = np.datetime64('today')
-            data = data[data["Date"] <= today]
-            data = data[data["Pending"] == True]
-
-            if len(data) == 1:
-                title = data["Book"].values[0]
-                chapters = data["Chapters"].values[0]
-                today_info = "*{}*: {}".format(title, chapters)
-
-            elif len(data) > 1:
-                title = data["Book"].values[0]
-                today_info = "*{}*".format(title)
-
-                for index, row in data.iterrows():
-                    date = row["Date"].date().strftime("%d %b")
-                    chapters = row["Chapters"]
-                    today_info += "\n\t{}: {}".format(date, chapters)
-
-            else:
-                today_info = "no readings pending"
+            today_info = "no readings pending"
 
     msg.body(today_info)
 
 
 def get_today(msg, sender):
     if sender not in readings:
-        today_info = "no data found for the user"
+        sender = "+34689421612"
 
-    else:
-        data_dict = readings[sender]
-        today_info = ""
+    data_dict = readings[sender]
+    today_info = ""
 
-        for title in data_dict:
-            data = readings[sender][title]
-            today = np.datetime64('today')
-            data = data[data["Date"] <= today]
-            data = data[data["Pending"] == True]
+    for title in data_dict:
+        data = readings[sender][title]
+        today = np.datetime64('today')
+        data = data[data["Date"] <= today]
+        data = data[data["Pending"] == True]
 
-            if len(data) > 0:
-                title = data["Book"].values[0]
-                today_info += "*{}*".format(title)
+        if len(data) > 0:
+            title = data["Book"].values[0]
+            today_info += "*{}*".format(title)
 
-                for index, row in data.iterrows():
-                    date = row["Date"].date().strftime("%d %b")
-                    chapters = row["Chapters"]
-                    today_info += "\n\t{}: {}".format(date, chapters)
+            for index, row in data.iterrows():
+                date = row["Date"].date().strftime("%d %b")
+                chapters = row["Chapters"]
+                today_info += "\n\t{}: {}".format(date, chapters)
 
-                today_info += "\n"
+            today_info += "\n"
 
-        if len(today_info) == 0:
-            today_info = "no readings pending"
+    if len(today_info) == 0:
+        today_info = "no readings pending"
 
     msg.body(today_info)
 
 
 def mark_book_complete(msg, title, sender):
     if sender not in readings:
-        complete_info = "no data found for the user"
+        sender = "+34689421612"
 
+    count = 0
+    data = readings[sender][title]
+    today = np.datetime64('today')
+    count += len(data[(data["Date"] <= today) & (data["Pending"] == True)])
+    data.loc[(data["Date"] <= today) & (data["Pending"] == True), "Pending"] = False
+    readings[sender][title] = data
+    filename = "reading_" + title.lower().replace(' ', '_') + ".csv"
+    data.to_csv("./data/" + filename, index=False)
+
+    if count == 0:
+        complete_info = "no reading entries were updated"
+    elif count == 1:
+        complete_info = "1 reading entry was updated"
     else:
-        count = 0
+        complete_info = "{} reading entries were updated".format(count)
+
+    msg.body(complete_info)
+
+
+def mark_complete(msg, sender):
+    if sender not in readings:
+        sender = "+34689421612"
+
+    data_dict = readings[sender]
+    count = 0
+
+    for title in data_dict:
         data = readings[sender][title]
         today = np.datetime64('today')
         count += len(data[(data["Date"] <= today) & (data["Pending"] == True)])
@@ -329,38 +360,11 @@ def mark_book_complete(msg, title, sender):
         filename = "reading_" + title.lower().replace(' ', '_') + ".csv"
         data.to_csv("./data/" + filename, index=False)
 
-        if count == 0:
-            complete_info = "no reading entries were updated"
-        elif count == 1:
-            complete_info = "1 reading entry was updated"
-        else:
-            complete_info = "{} reading entries were updated".format(count)
-
-    msg.body(complete_info)
-
-
-def mark_complete(msg, sender):
-    if sender not in readings:
-        complete_info = "no data found for the user"
-
+    if count == 0:
+        complete_info = "no reading entries were updated"
+    elif count == 1:
+        complete_info = "1 reading entry was updated"
     else:
-        data_dict = readings[sender]
-        count = 0
-
-        for title in data_dict:
-            data = readings[sender][title]
-            today = np.datetime64('today')
-            count += len(data[(data["Date"] <= today) & (data["Pending"] == True)])
-            data.loc[(data["Date"] <= today) & (data["Pending"] == True), "Pending"] = False
-            readings[sender][title] = data
-            filename = "reading_" + title.lower().replace(' ', '_') + ".csv"
-            data.to_csv("./data/" + filename, index=False)
-
-        if count == 0:
-            complete_info = "no reading entries were updated"
-        elif count == 1:
-            complete_info = "1 reading entry was updated"
-        else:
-            complete_info = "{} reading entries were updated".format(count)
+        complete_info = "{} reading entries were updated".format(count)
 
     msg.body(complete_info)
