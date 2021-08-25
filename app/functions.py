@@ -328,8 +328,10 @@ def mark_book_complete(msg, title, sender):
     data = readings[sender][title]
     today = np.datetime64('today')
     count += len(data[(data["Date"] <= today) & (data["Pending"] == True)])
+    print(data.head(10))
     data.loc[(data["Date"] <= today) & (data["Pending"] == True), "Pending"] = False
     readings[sender][title] = data
+    print(data.head(10))
     filename = "reading_" + title.lower().replace(' ', '_') + ".csv"
     data.to_csv("./data/" + filename, index=False)
 
@@ -354,8 +356,10 @@ def mark_complete(msg, sender):
         data = readings[sender][title]
         today = np.datetime64('today')
         count += len(data[(data["Date"] <= today) & (data["Pending"] == True)])
+        print(data.head(10))
         data.loc[(data["Date"] <= today) & (data["Pending"] == True), "Pending"] = False
         readings[sender][title] = data
+        print(data.head(10))
         filename = "reading_" + title.lower().replace(' ', '_') + ".csv"
         data.to_csv("./data/" + filename, index=False)
 
