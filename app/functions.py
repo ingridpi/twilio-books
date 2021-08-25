@@ -175,22 +175,23 @@ def look_author(author):
                 book = item["volumeInfo"]
                 name = book["authors"][0]
 
-                if author in name.lower():
-                    if i == 0:
-                        author_info += "*{}*".format(name)
+                if "authors" in book:
+                    name = book["authors"][0]
 
-                    title = book["title"]
-                    rating = book["averageRating"] if "averageRating" in book else "unknown"
-                    author_info += "\n{} ({})".format(title, rating)
+                    if author in name.lower():
+                        if i == 0:
+                            author_info += "*{}*".format(name)
 
-                    i += 1
+                        title = book["title"]
+                        rating = book["averageRating"] if "averageRating" in book else "unknown"
+                        author_info += "\n{} ({})".format(title, rating)
+                        i += 1
 
                 if i == max:
                     break
 
-            else:
+            if i == 0:
                 author_info = "author could not be found"
-
 
         else:
             author_info = "author could not be found"
