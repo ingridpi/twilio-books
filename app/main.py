@@ -6,11 +6,6 @@ from app.functions import *
 app = Flask('books')
 
 
-@app.before_first_request
-def setup():
-    init()
-    
-
 @app.route('/', methods=['GET'])
 def start():
     return "<h1>Welcome to the Bookish app!</h1> <p>To enable this service on WhatsApp, text: join collect-dried to +1 415 523 8886</p>"
@@ -36,6 +31,11 @@ def book():
         responded = True
 
     else:
+        if 'hi' in incoming:
+            add_sender(sender)
+            hello(msg)
+            responded = True
+
         if 'quote' in incoming:
             quote(msg)
             responded = True
